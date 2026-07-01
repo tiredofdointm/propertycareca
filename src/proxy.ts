@@ -6,8 +6,10 @@ export async function proxy(request: NextRequest) {
 
   const isLoginPage = pathname === "/admin/login";
   const isLoginApi = pathname === "/api/admin/login";
+  // Google OAuth entry + callback must be reachable while logged out.
+  const isGoogleAuth = pathname.startsWith("/api/admin/auth/google");
 
-  if (isLoginPage || isLoginApi) {
+  if (isLoginPage || isLoginApi || isGoogleAuth) {
     return NextResponse.next();
   }
 

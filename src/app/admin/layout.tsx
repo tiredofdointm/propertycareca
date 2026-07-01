@@ -19,8 +19,8 @@ export default async function AdminLayout({
   );
 
   return (
-    <div className="flex min-h-screen flex-col bg-zinc-50">
-      <header className="border-b border-black/5 bg-white">
+    <div className="flex min-h-screen flex-col">
+      <header className="border-b border-line bg-surface">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <Link href="/admin/leads" className="text-lg font-bold text-brand-dark">
             PropertyCare Admin
@@ -35,6 +35,12 @@ export default async function AdminLayout({
               </Link>
               <Link href="/admin/campaigns" className="hover:text-brand-dark">
                 Campaigns
+              </Link>
+              <Link href="/admin/objectives" className="hover:text-brand-dark">
+                Objectives
+              </Link>
+              <Link href="/admin/settings" className="hover:text-brand-dark">
+                Settings
               </Link>
               <LogoutButton />
             </nav>

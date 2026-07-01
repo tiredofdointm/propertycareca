@@ -3,6 +3,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Analytics } from "@/components/Analytics";
 import { AttributionCapture } from "@/components/AttributionCapture";
+import { LocalBusinessJsonLd } from "@/components/StructuredData";
 
 export default function SiteLayout({
   children,
@@ -11,6 +12,7 @@ export default function SiteLayout({
 }) {
   return (
     <div className="flex min-h-full flex-1 flex-col">
+      <LocalBusinessJsonLd />
       <Analytics />
       <Suspense fallback={null}>
         <AttributionCapture />

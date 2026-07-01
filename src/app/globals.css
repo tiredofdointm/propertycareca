@@ -1,21 +1,29 @@
 @import "tailwindcss";
 
+/*
+ * Site palette: a warm parchment background (never stark white) with
+ * slightly lighter "surface" cards so content visibly lifts off the page.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #14231c;
+  --background: #f0ebe0;
+  --surface: #faf7f0;
+  --foreground: #22271f;
   --brand: #1f6f4c;
   --brand-dark: #16523a;
-  --brand-light: #e7f2ec;
+  --brand-light: #e0ecdf;
   --accent: #d98e2b;
+  --line: rgba(34, 39, 31, 0.12);
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-surface: var(--surface);
   --color-foreground: var(--foreground);
   --color-brand: var(--brand);
   --color-brand-dark: var(--brand-dark);
   --color-brand-light: var(--brand-light);
   --color-accent: var(--accent);
+  --color-line: var(--line);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }

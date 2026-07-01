@@ -1,12 +1,22 @@
-# PropertyCare.ca
+# PropertyCareCA (propertycareca.com)
 
-A property maintenance business platform: marketing site, service catalog,
-quote requests, online booking with Stripe deposit payments, and an admin
-dashboard for managing leads and bookings.
+A California property care / maintenance business platform: marketing site,
+service catalog, Estimate & Enterprise plans, quote requests, online booking
+with Stripe deposit payments, and an admin dashboard for managing leads,
+bookings, prices/fees, the connected Stripe account, and business objectives.
 
 **Stack:** Next.js (App Router) + TypeScript + Tailwind CSS, Drizzle ORM +
-PostgreSQL, Stripe Checkout, cookie-based admin auth. Packaged for Google
-Cloud Run + Cloud SQL.
+PostgreSQL, Stripe Checkout, cookie-based admin auth (email/password and
+Sign in with Google). Packaged for Google Cloud Run + Cloud SQL.
+
+## Pricing model
+
+Public pages never show fixed prices. The **Estimate plan** gives every
+customer a free custom quote (pricing varies by location, scope, and how
+much needs doing each visit), and the **Enterprise plan** (`/plans`) is a
+custom-priced partnership for realtors, landlords, property managers, and
+construction firms. Deposits, internal estimate bases, and an optional
+booking fee are all editable at **Admin → Settings** — no redeploy needed.
 
 ## Local development
 
@@ -36,9 +46,18 @@ expands unescaped `$name` sequences in `.env` files, which silently corrupts
 bcrypt hashes (they contain `$2b$12$...`). If you ever hand-edit the hash,
 escape each `$` as `\$`.
 
-Stripe deposit payments and the webhook are only active when `STRIPE_SECRET_KEY`
-/ `STRIPE_WEBHOOK_SECRET` are set; without them, booking still works and the
-confirmation page tells the customer you'll follow up to arrange payment.
+Stripe deposit payments can be configured two ways: paste your keys at
+**Admin → Settings** (stored encrypted in the database, switchable to a new
+Stripe account any time, with a "Test connection" button), or set
+`STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` env vars as a fallback. The
+dashboard-connected account always wins. Without either, booking still works
+and the confirmation page tells the customer you'll follow up to arrange
+payment.
+
+**Sign in with Google** for the admin dashboard is optional and documented
+step-by-step in `docs/google-login-setup.md` (create an OAuth client in
+Google Cloud Console, set `GOOGLE_OAUTH_CLIENT_ID`/`GOOGLE_OAUTH_CLIENT_SECRET`,
+allowlist emails via `GOOGLE_ADMIN_EMAILS`).
 
 ## Analytics & ad attribution
 
@@ -163,7 +182,7 @@ DATABASE_URL='postgresql://propertycare:<password>@localhost:5432/propertycare' 
 
 ```bash
 gcloud builds submit --config cloudbuild.yaml \
-  --substitutions=_REGION=northamerica-northeast1,_REPO=propertycareca,_SERVICE=propertycareca,_CLOUDSQL_INSTANCE=<PROJECT>:<REGION>:propertycareca-db,_SITE_URL=https://propertycare.ca,_GTM_ID=GTM-XXXXXXX
+  --substitutions=_REGION=northamerica-northeast1,_REPO=propertycareca,_SERVICE=propertycareca,_CLOUDSQL_INSTANCE=<PROJECT>:<REGION>:propertycareca-db,_SITE_URL=https://propertycareca.com,_GTM_ID=GTM-XXXXXXX
 ```
 
 `cloudbuild.yaml` builds the Docker image, pushes it to Artifact Registry,
@@ -185,10 +204,21 @@ as `STRIPE_WEBHOOK_SECRET`.
 
 ## Architecture notes
 
-- **Auth**: single-admin, cookie-based session (HMAC-signed with
+- **Auth**: cookie-based admin session (HMAC-signed with
   `ADMIN_SESSION_SECRET`, verified in `src/proxy.ts` — Next's proxy/middleware
-  file). No third-party auth provider; intentionally simple for one admin
-  user. Revisit if multiple staff accounts are needed.
+  file), obtainable via email/password or Sign in with Google
+  (`docs/google-login-setup.md`). Every platform keeps a separate session
+  surface: the admin cookie (`pc_admin_session`), the short-lived Google
+  OAuth state cookie, customer attribution in localStorage, and Stripe
+  Checkout hosted on stripe.com never overlap.
+- **Owner settings**: `site_settings` key/value table (Drizzle) drives
+  deposits, estimate bases, booking fee, and Stripe credentials (AES-256-GCM
+  encrypted with a key derived from `ADMIN_SESSION_SECRET`). Env vars remain
+  the fallback.
+- **Objectives**: the `/admin/objectives` board tracks business goals with
+  status (not started / in progress / completed), started/completed
+  timestamps, and a self-assessed percent complete; seeded with the platform
+  roadmap by migration 0002.
 - **Payments**: Stripe Checkout for booking deposits only (not full invoicing).
   Booking and payment status live in Postgres; the webhook is the source of
   truth for `deposit_paid`.

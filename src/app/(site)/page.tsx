@@ -1,13 +1,13 @@
 import Link from "next/link";
-import { services, formatCents } from "@/lib/services-data";
+import { services } from "@/lib/services-data";
 
 export default function HomePage() {
   return (
     <div className="flex flex-col">
-      <section className="bg-gradient-to-b from-brand-light to-white">
+      <section className="bg-gradient-to-b from-brand-light to-background">
         <div className="mx-auto flex max-w-6xl flex-col gap-8 px-6 py-20 sm:py-28">
           <p className="text-sm font-semibold uppercase tracking-wide text-brand">
-            Serving homes &amp; businesses across Canada
+            Serving homes, businesses &amp; real estate professionals across California
           </p>
           <h1 className="max-w-2xl text-4xl font-bold tracking-tight text-brand-dark sm:text-5xl">
             Property care that shows up, every season.
@@ -49,7 +49,7 @@ export default function HomePage() {
             <Link
               key={service.slug}
               href={`/services/${service.slug}`}
-              className="group flex flex-col rounded-2xl border border-black/5 bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
+              className="group flex flex-col rounded-2xl border border-line bg-surface p-6 shadow-sm transition-shadow hover:shadow-md"
             >
               <span className="w-fit rounded-full bg-brand-light px-3 py-1 text-xs font-semibold text-brand-dark">
                 {service.season}
@@ -61,7 +61,7 @@ export default function HomePage() {
                 {service.shortDescription}
               </p>
               <p className="mt-4 text-sm font-semibold text-brand-dark">
-                From {formatCents(service.startingPriceCents)}
+                Free custom estimate
               </p>
             </Link>
           ))}

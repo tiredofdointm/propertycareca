@@ -15,6 +15,13 @@
       "when": 1782934163773,
       "tag": "0001_broad_cammi",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1782939444783,
+      "tag": "0002_settings_objectives_plans",
+      "breakpoints": true
     }
   ]
 }

@@ -4,6 +4,7 @@ import { bookings } from "@/lib/db/schema";
 import { bookingFormSchema } from "@/lib/validation";
 import { readJsonBody, zodFieldErrors } from "@/lib/api-utils";
 import { getServiceBySlug } from "@/lib/services-data";
+import { getDepositCentsForService } from "@/lib/settings";
 
 export async function POST(request: NextRequest) {
   const body = await readJsonBody(request);
@@ -48,6 +49,11 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  // Deposit comes from the owner's dashboard override when set, otherwise
+  // the service default.
+  const depositCents =
+    (await getDepositCentsForService(serviceSlug)) ?? service.depositCents;
+
   const [booking] = await db
     .insert(bookings)
     .values({
@@ -58,7 +64,7 @@ export async function POST(request: NextRequest) {
       serviceSlug,
       preferredDate,
       notes: notes || null,
-      depositAmountCents: service.depositCents,
+      depositAmountCents: depositCents,
       utmSource,
       utmMedium,
       utmCampaign,

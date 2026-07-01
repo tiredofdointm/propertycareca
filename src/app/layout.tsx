@@ -12,13 +12,46 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://propertycareca.com";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: {
-    default: "PropertyCare.ca | Property Maintenance Across Canada",
-    template: "%s | PropertyCare.ca",
+    default:
+      "PropertyCareCA | Property Maintenance & Real Estate Services in California",
+    template: "%s | PropertyCareCA",
   },
   description:
-    "Lawn care, snow removal, gutter cleaning, pressure washing, and handyman services for homes and businesses across Canada. Get a free quote today.",
+    "Property maintenance for California homes, rentals, and businesses: lawn care, gutter cleaning, pressure washing, handyman repairs, construction cleanup, and seasonal upkeep. Free custom estimates for homeowners, landlords, realtors, and property managers.",
+  keywords: [
+    "property maintenance California",
+    "real estate services",
+    "property management support",
+    "construction cleanup",
+    "handyman services",
+    "lawn care",
+    "gutter cleaning",
+    "pressure washing",
+    "rental property maintenance",
+    "property care",
+  ],
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    url: siteUrl,
+    siteName: "PropertyCareCA",
+    title:
+      "PropertyCareCA | Property Maintenance & Real Estate Services in California",
+    description:
+      "One dependable crew for everything your property needs — maintenance, repairs, and upkeep for homes, rentals, and commercial real estate across California.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "PropertyCareCA | Property Maintenance in California",
+    description:
+      "Free custom estimates for property maintenance, repairs, and real-estate support services across California.",
+  },
 };
 
 export default function RootLayout({

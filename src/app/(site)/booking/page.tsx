@@ -5,7 +5,7 @@ import { BookingForm } from "@/components/BookingForm";
 export const metadata: Metadata = {
   title: "Book a Service",
   description:
-    "Book lawn care, snow removal, gutter cleaning, or any PropertyCare.ca service online in minutes.",
+    "Book lawn care, gutter cleaning, pressure washing, or any PropertyCareCA service online in minutes.",
 };
 
 export default function BookingPage() {

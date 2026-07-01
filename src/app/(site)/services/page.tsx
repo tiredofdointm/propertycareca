@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { services, formatCents } from "@/lib/services-data";
+import { services } from "@/lib/services-data";
 
 export const metadata: Metadata = {
   title: "Services",
   description:
-    "Lawn care, snow removal, gutter cleaning, pressure washing, handyman repairs, and seasonal cleanups for properties across Canada.",
+    "Lawn care, gutter cleaning, pressure washing, handyman repairs, and seasonal cleanups for homes, rentals, and commercial properties across California.",
 };
 
 export default function ServicesPage() {
@@ -24,7 +24,7 @@ export default function ServicesPage() {
           <Link
             key={service.slug}
             href={`/services/${service.slug}`}
-            className="group flex flex-col rounded-2xl border border-black/5 bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
+            className="group flex flex-col rounded-2xl border border-line bg-surface p-6 shadow-sm transition-shadow hover:shadow-md"
           >
             <span className="w-fit rounded-full bg-brand-light px-3 py-1 text-xs font-semibold text-brand-dark">
               {service.season}
@@ -36,7 +36,7 @@ export default function ServicesPage() {
               {service.shortDescription}
             </p>
             <p className="mt-4 text-sm font-semibold text-brand-dark">
-              From {formatCents(service.startingPriceCents)}
+              Free custom estimate
             </p>
           </Link>
         ))}

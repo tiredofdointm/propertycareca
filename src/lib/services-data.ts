@@ -4,7 +4,13 @@ export type Service = {
   shortDescription: string;
   description: string;
   highlights: string[];
+  /**
+   * Internal reference price used as a starting point when the team writes a
+   * custom estimate. Never shown on public pages — every job is quoted
+   * individually based on location, scope, and frequency.
+   */
   startingPriceCents: number;
+  /** Default booking deposit; can be overridden per-service in Admin → Settings. */
   depositCents: number;
   season: "Spring" | "Summer" | "Fall" | "Winter" | "Year-round";
 };
@@ -33,7 +39,7 @@ export const services: Service[] = [
     shortDescription:
       "Reliable driveway and walkway clearing so you never have to shovel before sunrise again.",
     description:
-      "Canadian winters don't wait, and neither do we. Our snow removal service covers driveways, walkways, and entrances with priority dispatch as soon as accumulation hits your property's trigger depth. We apply ice melt and sand to keep high-traffic areas safe, and offer seasonal contracts so you have guaranteed coverage all winter, plus on-demand single-visit clearing for one-off storms.",
+      "Mountain and high-desert winters don't wait, and neither do we. Our snow removal service covers driveways, walkways, and entrances with priority dispatch as soon as accumulation hits your property's trigger depth. We apply ice melt and sand to keep high-traffic areas safe, and offer seasonal contracts so you have guaranteed coverage all winter, plus on-demand single-visit clearing for one-off storms.",
     highlights: [
       "Seasonal contracts with guaranteed priority dispatch",
       "Driveway, walkway, and entrance clearing",
@@ -46,7 +52,7 @@ export const services: Service[] = [
   },
   {
     slug: "gutter-cleaning",
-    name: "Gutter & Eavestrough Cleaning",
+    name: "Gutter & Downspout Cleaning",
     shortDescription:
       "Debris removal and a full downspout flush to protect your roof and foundation from water damage.",
     description:
@@ -119,12 +125,12 @@ export function getServiceBySlug(slug: string): Service | undefined {
 }
 
 export function formatCents(cents: number): string {
-  return new Intl.NumberFormat("en-CA", {
+  return new Intl.NumberFormat("en-US", {
     style: "currency",
-    currency: "CAD",
+    currency: "USD",
   }).format(cents / 100);
 }
 
 export function formatDateTime(date: Date | string): string {
-  return new Date(date).toLocaleString("en-CA");
+  return new Date(date).toLocaleString("en-US");
 }

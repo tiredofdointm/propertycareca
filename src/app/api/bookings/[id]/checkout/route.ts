@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
+import type Stripe from "stripe";
 import { db } from "@/lib/db";
 import { bookings } from "@/lib/db/schema";
 import { getServiceBySlug } from "@/lib/services-data";
 import { getStripeClient } from "@/lib/stripe";
+import { getBookingFeeCents } from "@/lib/settings";
 import { parseIdParam } from "@/lib/api-utils";
 
 type RouteParams = {
@@ -17,7 +19,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ error: "Invalid booking id" }, { status: 400 });
   }
 
-  const stripe = getStripeClient();
+  const stripe = await getStripeClient();
   if (!stripe) {
     return NextResponse.json(
       { error: "Online payments are not currently available." },
@@ -63,21 +65,35 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
   }
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? request.nextUrl.origin;
 
+  // Optional owner-configured flat booking fee (Admin → Settings).
+  const bookingFeeCents = await getBookingFeeCents();
+  const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
+    {
+      quantity: 1,
+      price_data: {
+        currency: "usd",
+        unit_amount: booking.depositAmountCents,
+        product_data: {
+          name: `${service.name} — Booking Deposit`,
+        },
+      },
+    },
+  ];
+  if (bookingFeeCents > 0) {
+    lineItems.push({
+      quantity: 1,
+      price_data: {
+        currency: "usd",
+        unit_amount: bookingFeeCents,
+        product_data: { name: "Booking fee" },
+      },
+    });
+  }
+
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
     customer_email: booking.email,
-    line_items: [
-      {
-        quantity: 1,
-        price_data: {
-          currency: "cad",
-          unit_amount: booking.depositAmountCents,
-          product_data: {
-            name: `${service.name} — Booking Deposit`,
-          },
-        },
-      },
-    ],
+    line_items: lineItems,
     success_url: `${siteUrl}/booking/${booking.id}?paid=1`,
     cancel_url: `${siteUrl}/booking/${booking.id}`,
     metadata: { bookingId: String(booking.id) },

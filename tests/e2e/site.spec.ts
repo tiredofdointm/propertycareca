@@ -68,7 +68,30 @@ test.describe("booking flow", () => {
     await expect(page).toHaveURL(/\/booking\/\d+/);
     await expect(page.getByRole("heading", { name: /booking received/i })).toBeVisible();
     await expect(
-      page.getByRole("main").getByText(/Gutter & Eavestrough Cleaning/i)
+      page.getByRole("main").getByText(/Gutter & Downspout Cleaning/i)
     ).toBeVisible();
+  });
+});
+
+test.describe("plans", () => {
+  test("shows Estimate and Enterprise plans without dollar prices", async ({ page }) => {
+    await page.goto("/plans");
+    await expect(page.getByRole("heading", { name: "Estimate Plan" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Enterprise Plan" })).toBeVisible();
+    // No out-of-the-box pricing anywhere on the page.
+    await expect(page.getByRole("main")).not.toContainText("$");
+  });
+
+  test("enterprise CTA opens the contact form as an enterprise inquiry", async ({ page }) => {
+    await page.goto("/plans");
+    await page.getByRole("link", { name: /talk to us about enterprise/i }).click();
+    await expect(page).toHaveURL(/\/contact\?plan=enterprise/);
+    await expect(page.getByText(/enterprise inquiry/i)).toBeVisible();
+  });
+
+  test("service pages advertise free custom estimates instead of prices", async ({ page }) => {
+    await page.goto("/services/lawn-care-landscaping");
+    await expect(page.getByText(/custom estimate/i).first()).toBeVisible();
+    await expect(page.getByRole("main")).not.toContainText("$");
   });
 });
