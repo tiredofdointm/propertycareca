@@ -10,6 +10,16 @@ test.describe("ad/campaign attribution", () => {
     await page.goto(
       "/?utm_source=facebook&utm_medium=paid-social&utm_campaign=e2e-attribution-test&gclid=e2e-gclid-123"
     );
+    // Wait for AttributionCapture's effect to actually write to localStorage
+    // before navigating away — a real user can't click a link faster than a
+    // mount effect fires, but an instant page.goto() can outrun it.
+    await page.waitForFunction(() => {
+      try {
+        return window.localStorage.getItem("pc_attribution") !== null;
+      } catch {
+        return false;
+      }
+    });
     await page.goto("/contact");
 
     const email = `attribution-${Date.now()}@example.com`;

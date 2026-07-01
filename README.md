@@ -43,33 +43,62 @@ confirmation page tells the customer you'll follow up to arrange payment.
 ## Analytics & ad attribution
 
 All of this is optional and driven entirely by env vars — leave them unset
-and nothing loads.
+and nothing loads. Loaded only on public marketing pages
+(`src/app/(site)/layout.tsx`), never on `/admin`, so internal usage doesn't
+pollute your analytics.
 
-- **GA4 / GTM**: set `NEXT_PUBLIC_GA_MEASUREMENT_ID` (a GA4 `G-XXXXXXX`
-  measurement id) and/or `NEXT_PUBLIC_GTM_ID` (a GTM `GTM-XXXXXXX` container
-  id). Loaded only on public marketing pages (`src/app/(site)/layout.tsx`),
-  never on `/admin`, so internal usage doesn't pollute your analytics. If you
-  set both, make sure you're not double-firing the same GA4 tag from both the
-  direct gtag.js load and a GTM tag — that's a config choice, not something
-  the code guards against.
-- **Ad attribution**: every visit's `utm_source`/`utm_medium`/`utm_campaign`/
-  `utm_term`/`utm_content`/`gclid` (plus the true landing page and referrer)
-  are captured client-side (`src/lib/attribution.ts`) into `localStorage` and
-  submitted silently alongside every quote request and booking. A fresh utm
-  param on a later page overwrites the stored value (last-touch); the
-  landing page/referrer are recorded once, on the visitor's actual entry
-  page. View the aggregated results at **Admin → Campaigns**
-  (`/admin/campaigns`) — leads, bookings, and deposits-paid grouped by
-  source/campaign, so you can compare what different ads/audiences actually
-  produced.
-- **Google Ads conversions**: set `NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_ID`
-  (your account's `AW-XXXXXXX`) plus whichever conversion-action labels you
-  want to track: `NEXT_PUBLIC_GOOGLE_ADS_LABEL_LEAD` (quote submitted),
-  `NEXT_PUBLIC_GOOGLE_ADS_LABEL_BOOKING` (booking created), and/or
-  `NEXT_PUBLIC_GOOGLE_ADS_LABEL_DEPOSIT` (deposit actually paid — the
-  strongest signal to optimize a campaign toward). Each conversion action is
-  created in the Google Ads UI first; it gives you the label to paste in
-  here.
+**Important**: `NEXT_PUBLIC_*` vars are inlined into the JS bundle at
+**build time** (`next build`), not read at container startup. Setting them
+on the Cloud Run *service* after the image is already built does nothing —
+they have to be passed as Docker `--build-arg`s (see `cloudbuild.yaml` and
+the substitutions in the deploy command in §4 below). In local dev this
+doesn't matter — `npm run dev`/`npm run build` read `.env.local` directly.
+
+### GTM vs. direct GA4 — pick one, the code won't run both
+
+- If `NEXT_PUBLIC_GTM_ID` is set (a GTM `GTM-XXXXXXX` container id), **only
+  GTM loads** — no separate GA4 script. Configure GA4 and Google Ads as tags
+  *inside* the GTM workspace instead of duplicating them in env vars:
+  1. **GA4 Configuration tag**, trigger: All Pages. Use your GA4 stream's
+     measurement id (`G-XXXXXXX`) here.
+  2. **GA4 Event tags** (or Google Ads Conversion Tracking tags) triggered
+     on **Custom Event** triggers matching the event names this app already
+     pushes to `dataLayer`: `generate_lead` (quote submitted),
+     `booking_created`, and `deposit_paid` (fires once per booking, with
+     `value`/`currency` params already attached — this is the strongest
+     conversion signal to optimize toward).
+  3. If GA4 and Google Ads are linked in their own account settings (the
+     "Google tag" shown in GA4 admin, distinct from a GTM container id),
+     Google handles that linkage on its side — no extra wiring needed here.
+- If `NEXT_PUBLIC_GTM_ID` is unset but `NEXT_PUBLIC_GA_MEASUREMENT_ID` is
+  set, gtag.js loads directly and the app calls `gtag('event', ...)` itself
+  for the same three events, plus fires a Google Ads conversion (if
+  configured — see below) via `gtag('event', 'conversion', ...)`.
+
+### Direct-gtag.js-only Google Ads conversions (no GTM)
+
+Only relevant when you're *not* using GTM (see above). Set
+`NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_ID` (your account's `AW-XXXXXXX`) plus
+whichever conversion-action labels you want to track:
+`NEXT_PUBLIC_GOOGLE_ADS_LABEL_LEAD` (quote submitted),
+`NEXT_PUBLIC_GOOGLE_ADS_LABEL_BOOKING` (booking created), and/or
+`NEXT_PUBLIC_GOOGLE_ADS_LABEL_DEPOSIT` (deposit paid). Each conversion
+action is created in the Google Ads UI first; it gives you the label to
+paste in here.
+
+### Ad attribution
+
+Every visit's `utm_source`/`utm_medium`/`utm_campaign`/`utm_term`/
+`utm_content`/`gclid` (plus the true landing page and referrer) are captured
+client-side (`src/lib/attribution.ts`) into `localStorage` and submitted
+silently alongside every quote request and booking. A fresh utm param on a
+later page overwrites the stored value (last-touch); the landing
+page/referrer are recorded once, on the visitor's actual entry page. View
+the aggregated results at **Admin → Campaigns** (`/admin/campaigns`) —
+leads, bookings, and deposits-paid grouped by source/campaign, so you can
+compare what different ads/audiences actually produced. See
+`docs/google-ads-campaign-plan.md` for a ready-to-use campaign structure,
+ad copy, and testing framework built around this.
 
 ## Scripts
 
@@ -134,14 +163,19 @@ DATABASE_URL='postgresql://propertycare:<password>@localhost:5432/propertycare' 
 
 ```bash
 gcloud builds submit --config cloudbuild.yaml \
-  --substitutions=_REGION=northamerica-northeast1,_REPO=propertycareca,_SERVICE=propertycareca,_CLOUDSQL_INSTANCE=<PROJECT>:<REGION>:propertycareca-db
+  --substitutions=_REGION=northamerica-northeast1,_REPO=propertycareca,_SERVICE=propertycareca,_CLOUDSQL_INSTANCE=<PROJECT>:<REGION>:propertycareca-db,_SITE_URL=https://propertycare.ca,_GTM_ID=GTM-XXXXXXX
 ```
 
 `cloudbuild.yaml` builds the Docker image, pushes it to Artifact Registry,
-and deploys it to Cloud Run with the Cloud SQL connection attached. Set the
-service's env vars/secrets once via `gcloud run services update` (or the
-Console) — `cloudbuild.yaml` doesn't manage those so redeploys don't
-accidentally reset them.
+and deploys it to Cloud Run with the Cloud SQL connection attached. The
+`_SITE_URL`/`_GTM_ID`/`_GA_MEASUREMENT_ID`/`_GOOGLE_ADS_*` substitutions
+become `NEXT_PUBLIC_*` build args baked into the JS bundle (see the
+Analytics section above for why these can't just be set on the Cloud Run
+service afterwards) — omit whichever you're not using, they default to
+empty. Set server-side env vars/secrets (`DATABASE_URL`,
+`ADMIN_SESSION_SECRET`, Stripe keys, etc.) once via `gcloud run services
+update` (or the Console) — `cloudbuild.yaml` doesn't manage those so
+redeploys don't accidentally reset them.
 
 ### 5. Stripe webhook
 
