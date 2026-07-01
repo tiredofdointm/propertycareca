@@ -19,7 +19,7 @@ export default async function AdminBookingsPage() {
         Bookings ({allBookings.length}
         {allBookings.length === BOOKINGS_LIMIT ? "+" : ""})
       </h1>
-      <div className="mt-6 overflow-x-auto rounded-2xl border border-black/5 bg-white shadow-sm">
+      <div className="mt-6 overflow-x-auto rounded-2xl border border-line bg-surface shadow-sm">
         <table className="w-full min-w-[820px] text-left text-sm">
           <thead className="border-b border-black/5 text-xs uppercase text-foreground/50">
             <tr>

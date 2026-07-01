@@ -4,7 +4,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "About Us",
   description:
-    "PropertyCare.ca is a local property maintenance company serving homeowners and businesses with lawn care, snow removal, and handyman services.",
+    "PropertyCareCA is a California property maintenance company serving homeowners, real estate professionals, and businesses with lawn care, repairs, and construction-adjacent services.",
 };
 
 const values = [
@@ -33,7 +33,7 @@ export default function AboutPage() {
         contractors.
       </h1>
       <p className="mt-6 text-lg text-foreground/70">
-        PropertyCare.ca started with a simple frustration: booking a reliable
+        PropertyCareCA started with a simple frustration: booking a reliable
         crew for lawn care in the summer and snow removal in the winter meant
         juggling different companies, different quotes, and different
         schedules. We built a single team that handles property maintenance
@@ -49,7 +49,7 @@ export default function AboutPage() {
 
       <div className="mt-12 grid gap-6 sm:grid-cols-3">
         {values.map((value) => (
-          <div key={value.title} className="rounded-2xl border border-black/5 bg-white p-6 shadow-sm">
+          <div key={value.title} className="rounded-2xl border border-line bg-surface p-6 shadow-sm">
             <h2 className="text-lg font-semibold text-brand-dark">{value.title}</h2>
             <p className="mt-2 text-sm text-foreground/70">{value.description}</p>
           </div>
@@ -69,7 +69,7 @@ export default function AboutPage() {
           </Link>
           <Link
             href="/booking"
-            className="rounded-full border border-brand-dark/20 px-6 py-3 text-sm font-semibold text-brand-dark transition-colors hover:bg-white"
+            className="rounded-full border border-brand-dark/20 px-6 py-3 text-sm font-semibold text-brand-dark transition-colors hover:bg-surface"
           >
             Book a Service
           </Link>

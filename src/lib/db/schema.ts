@@ -24,6 +24,14 @@ export const bookingStatusEnum = pgEnum("booking_status", [
   "cancelled",
 ]);
 
+export const objectiveStatusEnum = pgEnum("objective_status", [
+  "not_started",
+  "in_progress",
+  "completed",
+]);
+
+export const leadPlanEnum = pgEnum("lead_plan", ["estimate", "enterprise"]);
+
 // Marketing-attribution columns captured from the URL a lead/booking was
 // submitted from, so campaigns/ad sources can be compared later. Returns a
 // fresh set of column builders each call — the same builder instances can't
@@ -49,6 +57,7 @@ export const leads = pgTable("leads", {
   address: text("address").notNull(),
   serviceSlug: varchar("service_slug", { length: 100 }).notNull(),
   message: text("message"),
+  plan: leadPlanEnum("plan").notNull().default("estimate"),
   status: leadStatusEnum("status").notNull().default("new"),
   ...attributionColumns(),
   createdAt: timestamp("created_at", { withTimezone: true })
@@ -80,7 +89,40 @@ export const bookings = pgTable("bookings", {
     .defaultNow(),
 });
 
+// Free-form key/value store for owner-editable configuration (pricing
+// overrides, fees, Stripe keys, integration ids) so the dashboard can change
+// them without a redeploy. Values are strings; secrets are encrypted before
+// being written (see src/lib/settings.ts).
+export const siteSettings = pgTable("site_settings", {
+  key: varchar("key", { length: 200 }).primaryKey(),
+  value: text("value").notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+// Business objectives / roadmap items tracked from the admin dashboard:
+// when work started, when it finished, and our own estimate of how done it is.
+export const objectives = pgTable("objectives", {
+  id: serial("id").primaryKey(),
+  title: varchar("title", { length: 300 }).notNull(),
+  details: text("details"),
+  status: objectiveStatusEnum("status").notNull().default("not_started"),
+  percentComplete: integer("percent_complete").notNull().default(0),
+  startedAt: timestamp("started_at", { withTimezone: true }),
+  completedAt: timestamp("completed_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
 export type Lead = typeof leads.$inferSelect;
 export type NewLead = typeof leads.$inferInsert;
 export type Booking = typeof bookings.$inferSelect;
 export type NewBooking = typeof bookings.$inferInsert;
+export type SiteSetting = typeof siteSettings.$inferSelect;
+export type Objective = typeof objectives.$inferSelect;
+export type NewObjective = typeof objectives.$inferInsert;

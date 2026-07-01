@@ -4,10 +4,11 @@ import Stripe from "stripe";
 import { db } from "@/lib/db";
 import { bookings } from "@/lib/db/schema";
 import { getStripeClient } from "@/lib/stripe";
+import { getStripeWebhookSecret } from "@/lib/settings";
 
 export async function POST(request: NextRequest) {
-  const stripe = getStripeClient();
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  const stripe = await getStripeClient();
+  const webhookSecret = await getStripeWebhookSecret();
 
   if (!stripe || !webhookSecret) {
     return NextResponse.json(

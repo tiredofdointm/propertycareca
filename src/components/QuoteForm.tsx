@@ -15,6 +15,7 @@ type FieldErrors = Partial<Record<
 export function QuoteForm() {
   const searchParams = useSearchParams();
   const preselectedService = searchParams.get("service") ?? "";
+  const plan = searchParams.get("plan") === "enterprise" ? "enterprise" : "estimate";
 
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">(
     "idle"
@@ -37,6 +38,7 @@ export function QuoteForm() {
       address: formData.get("address"),
       serviceSlug: formData.get("serviceSlug"),
       message: formData.get("message"),
+      plan,
       ...readAttribution(),
     };
 
@@ -84,6 +86,16 @@ export function QuoteForm() {
 
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-5">
+      {plan === "enterprise" ? (
+        <div className="rounded-2xl border border-accent/30 bg-accent/10 p-4 text-sm text-foreground/80">
+          <p className="font-semibold text-brand-dark">Enterprise inquiry</p>
+          <p className="mt-1">
+            Tell us about your portfolio or business below &mdash; pick the
+            service you need most and use the message box for the rest.
+            We&apos;ll follow up to scope a custom partnership and pricing.
+          </p>
+        </div>
+      ) : null}
       <div className="grid gap-5 sm:grid-cols-2">
         <Field label="Full name" name="name" error={errors.name}>
           <input

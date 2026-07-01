@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getServiceBySlug, services, formatCents } from "@/lib/services-data";
+import { getServiceBySlug, services } from "@/lib/services-data";
+import { ServiceJsonLd } from "@/components/StructuredData";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -30,6 +31,7 @@ export default async function ServiceDetailPage({ params }: PageProps) {
 
   return (
     <div className="mx-auto w-full max-w-4xl px-6 py-16">
+      <ServiceJsonLd slug={service.slug} />
       <Link href="/services" className="text-sm font-semibold text-brand hover:text-brand-dark">
         &larr; All services
       </Link>
@@ -57,13 +59,13 @@ export default async function ServiceDetailPage({ params }: PageProps) {
             ))}
           </ul>
         </div>
-        <aside className="rounded-2xl border border-black/5 bg-white p-6 shadow-sm">
-          <p className="text-sm text-foreground/60">Starting at</p>
-          <p className="text-2xl font-bold text-brand-dark">
-            {formatCents(service.startingPriceCents)}
-          </p>
+        <aside className="rounded-2xl border border-line bg-surface p-6 shadow-sm">
+          <p className="text-sm text-foreground/60">Pricing</p>
+          <p className="text-2xl font-bold text-brand-dark">Custom estimate</p>
           <p className="mt-1 text-xs text-foreground/50">
-            Final price depends on property size and scope.
+            Every property is different &mdash; we quote each job based on
+            location, scope, and how much needs to be done. Estimates are
+            always free.
           </p>
           <Link
             href={`/booking?service=${service.slug}`}

@@ -30,7 +30,7 @@ const statusCopy: Record<string, { title: string; description: string }> = {
   },
   completed: {
     title: "Service completed",
-    description: "Thanks for choosing PropertyCare.ca!",
+    description: "Thanks for choosing PropertyCareCA!",
   },
   cancelled: {
     title: "Booking cancelled",
@@ -58,6 +58,7 @@ export default async function BookingConfirmationPage({
   const service = getServiceBySlug(booking.serviceSlug);
   const copy = statusCopy[booking.status] ?? statusCopy.pending;
   const awaitingWebhook = paid === "1" && booking.status === "pending";
+  const stripeConfigured = await isStripeConfigured();
   const depositPaid = booking.status !== "pending" && booking.status !== "cancelled";
 
   return (
@@ -65,7 +66,7 @@ export default async function BookingConfirmationPage({
       <h1 className="text-3xl font-bold text-brand-dark">{copy.title}</h1>
       <p className="mt-2 text-foreground/70">{copy.description}</p>
 
-      <div className="mt-8 rounded-2xl border border-black/5 bg-white p-6 shadow-sm">
+      <div className="mt-8 rounded-2xl border border-line bg-surface p-6 shadow-sm">
         <dl className="grid gap-4 sm:grid-cols-2">
           <div>
             <dt className="text-xs font-semibold uppercase text-foreground/50">Service</dt>
@@ -105,10 +106,10 @@ export default async function BookingConfirmationPage({
             <PendingPaymentRefresher />
           </>
         ) : null}
-        {!awaitingWebhook && booking.status === "pending" && isStripeConfigured() ? (
+        {!awaitingWebhook && booking.status === "pending" && stripeConfigured ? (
           <PayDepositButton bookingId={booking.id} />
         ) : null}
-        {!awaitingWebhook && booking.status === "pending" && !isStripeConfigured() ? (
+        {!awaitingWebhook && booking.status === "pending" && !stripeConfigured ? (
           <p className="text-sm text-foreground/60">
             Online payment is temporarily unavailable. We&apos;ll follow up
             by phone or email to arrange your deposit.

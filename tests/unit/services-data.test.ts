@@ -17,7 +17,7 @@ describe("services-data", () => {
     expect(getServiceBySlug("does-not-exist")).toBeUndefined();
   });
 
-  it("formats cents as CAD currency", () => {
+  it("formats cents as USD currency", () => {
     expect(formatCents(4500)).toBe("$45.00");
   });
 });

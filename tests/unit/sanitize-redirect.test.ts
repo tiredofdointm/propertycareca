@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { sanitizeRedirect } from "@/components/AdminLoginForm";
+import { sanitizeRedirect } from "@/lib/sanitize-redirect";
 
 describe("sanitizeRedirect", () => {
   it("allows a same-origin relative path", () => {

@@ -7,11 +7,11 @@ export function Footer() {
       <div className="mx-auto grid max-w-6xl gap-10 px-6 py-12 sm:grid-cols-3">
         <div>
           <p className="text-lg font-bold text-brand-dark">
-            PropertyCare<span className="text-accent">.ca</span>
+            PropertyCare<span className="text-accent">CA</span>
           </p>
           <p className="mt-3 max-w-xs text-sm text-foreground/70">
-            Dependable property maintenance for homes and businesses across
-            the region, every season of the year.
+            Dependable property maintenance for homes, rentals, and
+            businesses across California, every season of the year.
           </p>
         </div>
         <div>
@@ -38,8 +38,13 @@ export function Footer() {
               </Link>
             </li>
             <li>
+              <Link href="/plans" className="hover:text-brand-dark">
+                Plans
+              </Link>
+            </li>
+            <li>
               <Link href="/contact" className="hover:text-brand-dark">
-                Get a Quote
+                Get an Estimate
               </Link>
             </li>
             <li>
@@ -56,7 +61,8 @@ export function Footer() {
         </div>
       </div>
       <div className="border-t border-black/5 py-4 text-center text-xs text-foreground/50">
-        &copy; {new Date().getFullYear()} PropertyCare.ca. All rights reserved.
+        &copy; {`${new Date().getFullYear()} `}PropertyCareCA &mdash;
+        propertycareca.com. All rights reserved.
       </div>
     </footer>
   );

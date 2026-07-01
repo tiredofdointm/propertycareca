@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { ADMIN_SESSION_COOKIE, verifySessionToken } from "@/lib/auth";
+import { isGoogleLoginConfigured } from "@/lib/google-oauth";
 import { AdminLoginForm } from "@/components/AdminLoginForm";
 
 export default async function AdminLoginPage() {
@@ -21,7 +22,7 @@ export default async function AdminLoginPage() {
       </p>
       <div className="mt-8">
         <Suspense fallback={null}>
-          <AdminLoginForm />
+          <AdminLoginForm googleEnabled={isGoogleLoginConfigured()} />
         </Suspense>
       </div>
     </div>

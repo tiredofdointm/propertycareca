@@ -19,7 +19,7 @@ export default async function AdminLeadsPage() {
         Leads ({allLeads.length}
         {allLeads.length === LEADS_LIMIT ? "+" : ""})
       </h1>
-      <div className="mt-6 overflow-x-auto rounded-2xl border border-black/5 bg-white shadow-sm">
+      <div className="mt-6 overflow-x-auto rounded-2xl border border-line bg-surface shadow-sm">
         <table className="w-full min-w-[720px] text-left text-sm">
           <thead className="border-b border-black/5 text-xs uppercase text-foreground/50">
             <tr>
@@ -35,7 +35,14 @@ export default async function AdminLeadsPage() {
             {allLeads.map((lead) => (
               <tr key={lead.id} className="border-b border-black/5 last:border-0">
                 <td className="px-4 py-3">
-                  <p className="font-medium text-foreground">{lead.name}</p>
+                  <p className="font-medium text-foreground">
+                    {lead.name}
+                    {lead.plan === "enterprise" ? (
+                      <span className="ml-2 rounded-full bg-accent/15 px-2 py-0.5 text-xs font-semibold text-accent">
+                        Enterprise
+                      </span>
+                    ) : null}
+                  </p>
                   <p className="text-foreground/60">{lead.email}</p>
                   <p className="text-foreground/60">{lead.phone}</p>
                 </td>
