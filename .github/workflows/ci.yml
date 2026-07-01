@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: propertycare
+          POSTGRES_PASSWORD: propertycare
+          POSTGRES_DB: propertycare
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U propertycare"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://propertycare:propertycare@localhost:5432/propertycare
+      ADMIN_SESSION_SECRET: ci-test-secret-not-for-production-0000000000000000
+      ADMIN_EMAIL: admin@propertycare.ca
+      # bcrypt hash of "CiTestPassword123!" — test-only credential, not a real secret.
+      ADMIN_PASSWORD_HASH: $2b$12$Ial3NjYNaKwtbJzPeanW6.cYfaNUVqQKk1ZyooRzbX5qmHFNu6FOG
+      E2E_ADMIN_EMAIL: admin@propertycare.ca
+      E2E_ADMIN_PASSWORD: CiTestPassword123!
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Run database migrations
+        run: npm run db:migrate
+
+      - name: Unit tests
+        run: npm run test
+
+      - name: Build
+        run: npm run build
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: E2E tests
+        run: npm run test:e2e
