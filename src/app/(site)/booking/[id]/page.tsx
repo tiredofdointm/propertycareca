@@ -8,6 +8,7 @@ import { isStripeConfigured } from "@/lib/stripe";
 import { parseIdParam } from "@/lib/api-utils";
 import { PayDepositButton } from "@/components/PayDepositButton";
 import { PendingPaymentRefresher } from "@/components/PendingPaymentRefresher";
+import { DepositPaidTracker } from "@/components/DepositPaidTracker";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -57,6 +58,7 @@ export default async function BookingConfirmationPage({
   const service = getServiceBySlug(booking.serviceSlug);
   const copy = statusCopy[booking.status] ?? statusCopy.pending;
   const awaitingWebhook = paid === "1" && booking.status === "pending";
+  const depositPaid = booking.status !== "pending" && booking.status !== "cancelled";
 
   return (
     <div className="mx-auto w-full max-w-2xl px-6 py-16">
@@ -85,6 +87,13 @@ export default async function BookingConfirmationPage({
           </div>
         </dl>
       </div>
+
+      {depositPaid ? (
+        <DepositPaidTracker
+          bookingId={booking.id}
+          valueCents={booking.depositAmountCents}
+        />
+      ) : null}
 
       <div className="mt-8">
         {awaitingWebhook ? (

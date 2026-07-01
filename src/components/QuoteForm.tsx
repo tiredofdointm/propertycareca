@@ -4,6 +4,8 @@ import { useState, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 import { services } from "@/lib/services-data";
 import { Field, inputClass } from "@/components/form/Field";
+import { readAttribution } from "@/lib/attribution";
+import { trackEvent, trackGoogleAdsConversion } from "@/lib/analytics";
 
 type FieldErrors = Partial<Record<
   "name" | "email" | "phone" | "address" | "serviceSlug" | "message",
@@ -35,6 +37,7 @@ export function QuoteForm() {
       address: formData.get("address"),
       serviceSlug: formData.get("serviceSlug"),
       message: formData.get("message"),
+      ...readAttribution(),
     };
 
     try {
@@ -47,6 +50,10 @@ export function QuoteForm() {
       if (response.ok) {
         setStatus("success");
         form.reset();
+        trackEvent("generate_lead", {
+          service_slug: payload.serviceSlug,
+        });
+        trackGoogleAdsConversion(process.env.NEXT_PUBLIC_GOOGLE_ADS_LABEL_LEAD);
         return;
       }
 

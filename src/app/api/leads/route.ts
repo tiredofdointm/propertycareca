@@ -21,7 +21,22 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { name, email, phone, address, serviceSlug, message } = parsed.data;
+  const {
+    name,
+    email,
+    phone,
+    address,
+    serviceSlug,
+    message,
+    utmSource,
+    utmMedium,
+    utmCampaign,
+    utmTerm,
+    utmContent,
+    gclid,
+    referrer,
+    landingPage,
+  } = parsed.data;
 
   const [lead] = await db
     .insert(leads)
@@ -32,6 +47,14 @@ export async function POST(request: NextRequest) {
       address,
       serviceSlug,
       message: message || null,
+      utmSource,
+      utmMedium,
+      utmCampaign,
+      utmTerm,
+      utmContent,
+      gclid,
+      referrer,
+      landingPage,
     })
     .returning({ id: leads.id });
 

@@ -33,6 +33,9 @@ export default async function AdminLayout({
               <Link href="/admin/bookings" className="hover:text-brand-dark">
                 Bookings
               </Link>
+              <Link href="/admin/campaigns" className="hover:text-brand-dark">
+                Campaigns
+              </Link>
               <LogoutButton />
             </nav>
           ) : null}

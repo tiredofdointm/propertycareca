@@ -6,6 +6,20 @@ const serviceSlugs = services.map((service) => service.slug) as [
   ...string[],
 ];
 
+// Marketing-attribution fields, sent silently alongside every lead/booking
+// submission (see src/lib/attribution.ts) — never shown to or required from
+// the customer, so every field is optional and capped to the DB column size.
+const attributionSchema = z.object({
+  utmSource: z.string().trim().max(200).optional(),
+  utmMedium: z.string().trim().max(200).optional(),
+  utmCampaign: z.string().trim().max(200).optional(),
+  utmTerm: z.string().trim().max(200).optional(),
+  utmContent: z.string().trim().max(200).optional(),
+  gclid: z.string().trim().max(200).optional(),
+  referrer: z.string().trim().max(500).optional(),
+  landingPage: z.string().trim().max(500).optional(),
+});
+
 export const leadFormSchema = z.object({
   name: z.string().trim().min(2, "Please enter your full name").max(200),
   email: z.string().trim().email("Please enter a valid email address"),
@@ -19,7 +33,7 @@ export const leadFormSchema = z.object({
     message: "Please select a service",
   }),
   message: z.string().trim().max(2000).optional().or(z.literal("")),
-});
+}).extend(attributionSchema.shape);
 
 export type LeadFormValues = z.infer<typeof leadFormSchema>;
 
@@ -51,7 +65,7 @@ export const bookingFormSchema = z.object({
       return chosen.getTime() >= earliestAllowed.getTime();
     }, "Please choose a date in the future"),
   notes: z.string().trim().max(2000).optional().or(z.literal("")),
-});
+}).extend(attributionSchema.shape);
 
 export type BookingFormValues = z.infer<typeof bookingFormSchema>;
 

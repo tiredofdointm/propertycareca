@@ -4,6 +4,8 @@ import { useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { services } from "@/lib/services-data";
 import { Field, inputClass } from "@/components/form/Field";
+import { readAttribution } from "@/lib/attribution";
+import { trackEvent, trackGoogleAdsConversion } from "@/lib/analytics";
 
 type FieldErrors = Partial<Record<
   "name" | "email" | "phone" | "address" | "serviceSlug" | "preferredDate" | "notes",
@@ -44,6 +46,7 @@ export function BookingForm() {
       serviceSlug: formData.get("serviceSlug"),
       preferredDate: formData.get("preferredDate"),
       notes: formData.get("notes"),
+      ...readAttribution(),
     };
 
     try {
@@ -56,6 +59,11 @@ export function BookingForm() {
       const body = await response.json().catch(() => null);
 
       if (response.ok && body?.id) {
+        trackEvent("booking_created", {
+          service_slug: payload.serviceSlug,
+          booking_id: body.id,
+        });
+        trackGoogleAdsConversion(process.env.NEXT_PUBLIC_GOOGLE_ADS_LABEL_BOOKING);
         router.push(`/booking/${body.id}`);
         return;
       }

@@ -24,6 +24,23 @@ export const bookingStatusEnum = pgEnum("booking_status", [
   "cancelled",
 ]);
 
+// Marketing-attribution columns captured from the URL a lead/booking was
+// submitted from, so campaigns/ad sources can be compared later. Returns a
+// fresh set of column builders each call — the same builder instances can't
+// be shared across two pgTable() definitions.
+function attributionColumns() {
+  return {
+    utmSource: varchar("utm_source", { length: 200 }),
+    utmMedium: varchar("utm_medium", { length: 200 }),
+    utmCampaign: varchar("utm_campaign", { length: 200 }),
+    utmTerm: varchar("utm_term", { length: 200 }),
+    utmContent: varchar("utm_content", { length: 200 }),
+    gclid: varchar("gclid", { length: 200 }),
+    referrer: text("referrer"),
+    landingPage: text("landing_page"),
+  };
+}
+
 export const leads = pgTable("leads", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 200 }).notNull(),
@@ -33,6 +50,7 @@ export const leads = pgTable("leads", {
   serviceSlug: varchar("service_slug", { length: 100 }).notNull(),
   message: text("message"),
   status: leadStatusEnum("status").notNull().default("new"),
+  ...attributionColumns(),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
@@ -53,6 +71,7 @@ export const bookings = pgTable("bookings", {
     length: 255,
   }),
   stripePaymentIntentId: varchar("stripe_payment_intent_id", { length: 255 }),
+  ...attributionColumns(),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),

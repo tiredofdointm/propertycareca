@@ -40,6 +40,37 @@ Stripe deposit payments and the webhook are only active when `STRIPE_SECRET_KEY`
 / `STRIPE_WEBHOOK_SECRET` are set; without them, booking still works and the
 confirmation page tells the customer you'll follow up to arrange payment.
 
+## Analytics & ad attribution
+
+All of this is optional and driven entirely by env vars — leave them unset
+and nothing loads.
+
+- **GA4 / GTM**: set `NEXT_PUBLIC_GA_MEASUREMENT_ID` (a GA4 `G-XXXXXXX`
+  measurement id) and/or `NEXT_PUBLIC_GTM_ID` (a GTM `GTM-XXXXXXX` container
+  id). Loaded only on public marketing pages (`src/app/(site)/layout.tsx`),
+  never on `/admin`, so internal usage doesn't pollute your analytics. If you
+  set both, make sure you're not double-firing the same GA4 tag from both the
+  direct gtag.js load and a GTM tag — that's a config choice, not something
+  the code guards against.
+- **Ad attribution**: every visit's `utm_source`/`utm_medium`/`utm_campaign`/
+  `utm_term`/`utm_content`/`gclid` (plus the true landing page and referrer)
+  are captured client-side (`src/lib/attribution.ts`) into `localStorage` and
+  submitted silently alongside every quote request and booking. A fresh utm
+  param on a later page overwrites the stored value (last-touch); the
+  landing page/referrer are recorded once, on the visitor's actual entry
+  page. View the aggregated results at **Admin → Campaigns**
+  (`/admin/campaigns`) — leads, bookings, and deposits-paid grouped by
+  source/campaign, so you can compare what different ads/audiences actually
+  produced.
+- **Google Ads conversions**: set `NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_ID`
+  (your account's `AW-XXXXXXX`) plus whichever conversion-action labels you
+  want to track: `NEXT_PUBLIC_GOOGLE_ADS_LABEL_LEAD` (quote submitted),
+  `NEXT_PUBLIC_GOOGLE_ADS_LABEL_BOOKING` (booking created), and/or
+  `NEXT_PUBLIC_GOOGLE_ADS_LABEL_DEPOSIT` (deposit actually paid — the
+  strongest signal to optimize a campaign toward). Each conversion action is
+  created in the Google Ads UI first; it gives you the label to paste in
+  here.
+
 ## Scripts
 
 | Command                          | Purpose                                   |

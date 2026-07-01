@@ -22,8 +22,23 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { name, email, phone, address, serviceSlug, preferredDate, notes } =
-    parsed.data;
+  const {
+    name,
+    email,
+    phone,
+    address,
+    serviceSlug,
+    preferredDate,
+    notes,
+    utmSource,
+    utmMedium,
+    utmCampaign,
+    utmTerm,
+    utmContent,
+    gclid,
+    referrer,
+    landingPage,
+  } = parsed.data;
 
   const service = getServiceBySlug(serviceSlug);
   if (!service) {
@@ -44,6 +59,14 @@ export async function POST(request: NextRequest) {
       preferredDate,
       notes: notes || null,
       depositAmountCents: service.depositCents,
+      utmSource,
+      utmMedium,
+      utmCampaign,
+      utmTerm,
+      utmContent,
+      gclid,
+      referrer,
+      landingPage,
     })
     .returning({ id: bookings.id });
 
