@@ -1,0 +1,46 @@
+# Builds the container image, pushes it to Artifact Registry, and deploys it
+# to Cloud Run. Run manually with:
+#
+#   gcloud builds submit --config cloudbuild.yaml \
+#     --substitutions=_REGION=northamerica-northeast1,_REPO=propertycareca,_SERVICE=propertycareca,_CLOUDSQL_INSTANCE=PROJECT:REGION:INSTANCE
+#
+# Database migrations are NOT run here — run `npm run db:migrate` against the
+# instance (via the Cloud SQL Auth Proxy) as a separate step before deploying
+# a revision that depends on new schema. See README.md.
+steps:
+  - id: build
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_SERVICE}:$SHORT_SHA
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_SERVICE}:latest
+      - .
+
+  - id: push
+    name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - --all-tags
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_SERVICE}
+
+  - id: deploy
+    name: gcr.io/google-cloud-sdk/slim
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - ${_SERVICE}
+      - --image=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_SERVICE}:$SHORT_SHA
+      - --region=${_REGION}
+      - --platform=managed
+      - --add-cloudsql-instances=${_CLOUDSQL_INSTANCE}
+      - --quiet
+
+images:
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_SERVICE}:$SHORT_SHA
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_SERVICE}:latest
+
+options:
+  logging: CLOUD_LOGGING_ONLY
