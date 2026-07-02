@@ -18,6 +18,12 @@ custom-priced partnership for realtors, landlords, property managers, and
 construction firms. Deposits, internal estimate bases, and an optional
 booking fee are all editable at **Admin → Settings** — no redeploy needed.
 
+## Launching to production
+
+Everything left to go live is collected in **`docs/launch-checklist.md`** —
+deploy, Stripe keys + webhook, Google sign-in credentials, and the Google Ads
+campaign, each with exact links and "done when" checks.
+
 ## Local development
 
 Prerequisites: Node 22+, a local PostgreSQL instance (via `docker compose` or
